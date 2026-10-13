@@ -28,6 +28,7 @@ from fireworks.training.sdk.client import (
     FiretitanTrainingClient,
     _r3_request_issues,
     generate_session_id,
+    _CreateModelResponse,
     _run_id_from_model_id,
     qualify_snapshot_name,
     _count_response_tokens,
@@ -2619,6 +2620,8 @@ class TestTrainingClientSamplingHelpers:
     def _make_client(self):
         client = FiretitanTrainingClient.__new__(FiretitanTrainingClient)
         client.routing_matrix_format, client.r3_store_id = "base64_inline", None
+        client._trainer_supports_rdma_weight_sync = False
+        client._trainer_rdma_weight_sync_enabled = None
         client._sampler_backend = None
         client._lora_rank = 0
         client._sampler_checkpoint_saved = False
@@ -3575,7 +3578,7 @@ class TestCreateTrainingClientDuplicate:
 
         class FakeFuture:
             def result(self):
-                return SimpleNamespace(model_id="model-id", comms="v1", routing_matrix_format="base64_inline", r3_store_id=None, supports_rdma_weight_sync=False)
+                return _CreateModelResponse(model_id="model-id")
 
         def run_coroutine_threadsafe(coro):
             coro.close()
@@ -3595,7 +3598,7 @@ class _ImmediateCreateModelFuture:
         pass
 
     async def result_async(self):
-        return SimpleNamespace(model_id="model-id", comms="v1", routing_matrix_format="base64_inline", r3_store_id=None, supports_rdma_weight_sync=False)
+        return _CreateModelResponse(model_id="model-id")
 
 
 @patch("fireworks.training.sdk.client._APIFuture", _ImmediateCreateModelFuture)
@@ -3906,6 +3909,22 @@ class TestAccountResolutionBestEffort:
         svc = _service()  # pre-cached account
         assert svc._resolved_account_id() == "test-account"
         assert svc._resolved_account_id() == "test-account"
+
+    def test_base_sampling_resolves_account_with_routing_headers(self):
+        svc = FiretitanServiceClient.__new__(FiretitanServiceClient)
+        svc.holder = SimpleNamespace(get_session_id=lambda: "ts-abc123")
+        svc._fireworks_api_key = "fw_x"
+        svc._managed_additional_headers = {"X-Fireworks-Dev-Environment": "dev-test"}
+
+        class RoutedFireworksClient:
+            def __init__(self, **kwargs):
+                if kwargs.get("additional_headers") != svc._managed_additional_headers:
+                    raise PermissionError("Account lookup reached the wrong environment")
+
+            account_id = "test-account"
+
+        with patch("fireworks.training.sdk.fireworks_client.FireworksClient", RoutedFireworksClient):
+            assert svc._serverless_base_sampling_model_name() == "accounts/test-account/trainingSessions/ts-abc123"
 
     def test_no_in_progress_none_published(self):
         # Regression: the cache must never hold a transient None *during*
