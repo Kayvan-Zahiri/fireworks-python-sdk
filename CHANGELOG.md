@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.26 (2026-10-15)
+
+Full Changelog: [v1.2.25...v1.2.26](https://github.com/fw-ai-external/python-sdk/compare/v1.2.25...v1.2.26)
+
+### Features
+* **training-sdk:** accept the built-in REINFORCE loss and expose trainer capabilities for REINFORCE, optional score centering, and shared server policy TIS/MIS; unsupported images fail before forward or backward submission
+
 ## 1.2.25 (2026-10-15)
 
 Full Changelog: [v1.2.24...v1.2.25](https://github.com/fw-ai-external/python-sdk/compare/v1.2.24...v1.2.25)
