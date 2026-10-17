@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.27 (2026-10-17)
+
+Full Changelog: [v1.2.26...v1.2.27](https://github.com/fw-ai-external/python-sdk/compare/v1.2.26...v1.2.27)
+
+### Features
+* **training-sdk:** accept keyword-only `images=` on `FiretitanSamplingClient.sample` for preprojected vision prompts, and reject unprojected image chunks so sampler-owned delimiters are not duplicated
+
+### Bug Fixes
+* **training-sdk:** remove the unused TITO parser fallback, distinguish upstream failures from local parsing failures, and retain bounded local failure traces while marking failed SDK trajectories untrainable; cookbook integration handles training-loop discard
+
 ## 1.2.26 (2026-10-15)
 
 Full Changelog: [v1.2.25...v1.2.26](https://github.com/fw-ai-external/python-sdk/compare/v1.2.25...v1.2.26)

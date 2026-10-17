@@ -1548,6 +1548,11 @@
             "topk_prompt_logprobs",
             "POSITIONAL_OR_KEYWORD",
             "0"
+          ],
+          [
+            "images",
+            "KEYWORD_ONLY",
+            "None"
           ]
         ]
       },
@@ -1583,6 +1588,11 @@
             "topk_prompt_logprobs",
             "POSITIONAL_OR_KEYWORD",
             "0"
+          ],
+          [
+            "images",
+            "KEYWORD_ONLY",
+            "None"
           ]
         ]
       }
